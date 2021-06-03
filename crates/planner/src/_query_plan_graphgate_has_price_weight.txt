@@ -1,0 +1,221 @@
+Query(
+    Sequence(
+        SequenceNode {
+            nodes: [
+                Fetch(
+                    FetchNode {
+                        service: "products",
+                        variables: VariablesRef {
+                            variables: {},
+                        },
+                        query: FetchQuery {
+                            entity_type: None,
+                            operation_type: Query,
+                            variable_definitions: VariableDefinitionsRef {
+                                variables: [],
+                            },
+                            selection_set: SelectionRefSet(
+                                [
+                                    FieldRef(
+                                        FieldRef {
+                                            field: Field {
+                                                alias: None,
+                                                name: Positioned {
+                                                    pos: Pos(7:3),
+                                                    node: Name(
+                                                        "topProducts",
+                                                    ),
+                                                },
+                                                arguments: [
+                                                    (
+                                                        Positioned {
+                                                            pos: Pos(7:15),
+                                                            node: Name(
+                                                                "first",
+                                                            ),
+                                                        },
+                                                        Positioned {
+                                                            pos: Pos(7:22),
+                                                            node: Number(
+                                                                Number(
+                                                                    1,
+                                                                ),
+                                                            ),
+                                                        },
+                                                    ),
+                                                ],
+                                                directives: [],
+                                                selection_set: Positioned {
+                                                    pos: Pos(7:25),
+                                                    node: SelectionSet {
+                                                        items: [
+                                                            Positioned {
+                                                                pos: Pos(8:5),
+                                                                node: Field(
+                                                                    Positioned {
+                                                                        pos: Pos(8:5),
+                                                                        node: Field {
+                                                                            alias: None,
+                                                                            name: Positioned {
+                                                                                pos: Pos(8:5),
+                                                                                node: Name(
+                                                                                    "upc",
+                                                                                ),
+                                                                            },
+                                                                            arguments: [],
+                                                                            directives: [],
+                                                                            selection_set: Positioned {
+                                                                                pos: Pos(0:0),
+                                                                                node: SelectionSet {
+                                                                                    items: [],
+                                                                                },
+                                                                            },
+                                                                        },
+                                                                    },
+                                                                ),
+                                                            },
+                                                            Positioned {
+                                                                pos: Pos(9:5),
+                                                                node: Field(
+                                                                    Positioned {
+                                                                        pos: Pos(9:5),
+                                                                        node: Field {
+                                                                            alias: None,
+                                                                            name: Positioned {
+                                                                                pos: Pos(9:5),
+                                                                                node: Name(
+                                                                                    "shippingEstimate",
+                                                                                ),
+                                                                            },
+                                                                            arguments: [],
+                                                                            directives: [],
+                                                                            selection_set: Positioned {
+                                                                                pos: Pos(0:0),
+                                                                                node: SelectionSet {
+                                                                                    items: [],
+                                                                                },
+                                                                            },
+                                                                        },
+                                                                    },
+                                                                ),
+                                                            },
+                                                        ],
+                                                    },
+                                                },
+                                            },
+                                            selection_set: SelectionRefSet(
+                                                [
+                                                    FieldRef(
+                                                        FieldRef {
+                                                            field: Field {
+                                                                alias: None,
+                                                                name: Positioned {
+                                                                    pos: Pos(8:5),
+                                                                    node: Name(
+                                                                        "upc",
+                                                                    ),
+                                                                },
+                                                                arguments: [],
+                                                                directives: [],
+                                                                selection_set: Positioned {
+                                                                    pos: Pos(0:0),
+                                                                    node: SelectionSet {
+                                                                        items: [],
+                                                                    },
+                                                                },
+                                                            },
+                                                            selection_set: SelectionRefSet(
+                                                                [],
+                                                            ),
+                                                        },
+                                                    ),
+                                                    RequiredRef(
+                                                        RequiredRef {
+                                                            prefix: 1,
+                                                            fields: KeyFields(
+                                                                {
+                                                                    Name(
+                                                                        "upc",
+                                                                    ): KeyFields(
+                                                                        {},
+                                                                    ),
+                                                                },
+                                                            ),
+                                                            requires: Some(
+                                                                KeyFields(
+                                                                    {
+                                                                        Name(
+                                                                            "price",
+                                                                        ): KeyFields(
+                                                                            {},
+                                                                        ),
+                                                                        Name(
+                                                                            "weight",
+                                                                        ): KeyFields(
+                                                                            {},
+                                                                        ),
+                                                                    },
+                                                                ),
+                                                            ),
+                                                        },
+                                                    ),
+                                                ],
+                                            ),
+                                        },
+                                    ),
+                                ],
+                            ),
+                        },
+                    },
+                ),
+                Flatten(
+                    FlattenNode {
+                        path: [topProducts],
+                        prefix: 1,
+                        service: "inventory",
+                        variables: VariablesRef {
+                            variables: {},
+                        },
+                        query: FetchQuery {
+                            entity_type: Some(
+                                "Product",
+                            ),
+                            operation_type: Subscription,
+                            variable_definitions: VariableDefinitionsRef {
+                                variables: [],
+                            },
+                            selection_set: SelectionRefSet(
+                                [
+                                    FieldRef(
+                                        FieldRef {
+                                            field: Field {
+                                                alias: None,
+                                                name: Positioned {
+                                                    pos: Pos(9:5),
+                                                    node: Name(
+                                                        "shippingEstimate",
+                                                    ),
+                                                },
+                                                arguments: [],
+                                                directives: [],
+                                                selection_set: Positioned {
+                                                    pos: Pos(0:0),
+                                                    node: SelectionSet {
+                                                        items: [],
+                                                    },
+                                                },
+                                            },
+                                            selection_set: SelectionRefSet(
+                                                [],
+                                            ),
+                                        },
+                                    ),
+                                ],
+                            ),
+                        },
+                    },
+                ),
+            ],
+        },
+    ),
+)

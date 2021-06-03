@@ -5,8 +5,9 @@ use indexmap::IndexMap;
 use serde::{Serialize, Serializer};
 use value::{ConstValue, Name, Variables};
 
-use crate::types::{FetchQuery, VariablesRef};
+use crate::types::{FetchQuery, VariablesRef, SelectionRef};
 use crate::Request;
+use std::borrow::Borrow;
 
 #[derive(Debug, Serialize)]
 #[serde(tag = "type", rename_all = "lowercase")]
@@ -25,6 +26,77 @@ impl<'a> PlanNode<'a> {
             PlanNode::Parallel(mut node) if node.nodes.len() == 1 => node.nodes.remove(0),
             _ => self,
         }
+    }
+}
+
+impl ToString for RootNode<'_> {
+    fn to_string(&self) -> String {
+        match self {
+            RootNode::Subscribe(_) => "".to_string(),
+            RootNode::Query(plan) => plan.to_string()
+        }
+    }
+}
+
+impl ToString for PlanNode<'_> {
+    fn to_string(&self) -> String {
+        fn stringify_nodes(output: &mut String, nodes: &[&PlanNode], indentation: &str) -> () {
+            if nodes.len() > 0 {
+                let next_indent = format!("{}{}", indentation, "  ");
+                for (index, node) in nodes.iter().enumerate() {
+                    stringify_node(output, &node, next_indent.as_str());
+                    if index < nodes.len() - 1 {
+                        output.push_str(",\n")
+                    }
+                }
+            }
+        }
+
+        fn stringify_node(output: &mut String, node: &PlanNode, indentation: &str) -> () {
+            let next_indent = format!("{}{}", indentation, " ");
+            let next_indent = next_indent.as_str();
+            match node {
+                PlanNode::Sequence(seq) => {
+                    output.push_str(format!("{}Sequence {{", indentation).as_str());
+                    let nodes: Vec<&PlanNode> = seq.nodes.iter().map(|n| n).collect();
+                    let nodes = nodes.as_slice();
+                    stringify_nodes(output, nodes, next_indent);
+                    output.push_str("\n}");
+                }
+                PlanNode::Parallel(par) => {
+                    output.push_str(format!("{}Parallel {{", indentation).as_str());
+                    let nodes: Vec<&PlanNode> = par.nodes.iter().map(|n| n).collect();
+                    let nodes = nodes.as_slice();
+                    stringify_nodes(output, nodes, next_indent);
+                    output.push_str("\n}");
+                }
+                PlanNode::Introspection(_) => {}
+                PlanNode::Fetch(fetch) => {
+                    output.push_str(format!("{indent}Fetch(service: {svc}) {{", indent = indentation, svc = fetch.service).as_str());
+                    let query = &fetch.query.selection_set.0;
+                    for select in query.iter() {
+                        match select {
+                            SelectionRef::FieldRef(field) => {
+                                output.push_str(format!("{:?}", field.field.selection_set).as_str())
+                            }
+                            SelectionRef::IntrospectionTypename => {}
+                            SelectionRef::RequiredRef(req) => {
+                                // output.push_str(format!("{:?}", req.fields).as_str())
+                            }
+                            SelectionRef::InlineFragment { type_condition, selection_set } => {
+                                // output.push_str("Inline Fragmentation!!!!")
+                            }
+                        }
+                    }
+                }
+                PlanNode::Flatten(_) => {}
+            };
+        }
+
+        let mut output = String::from("QueryPlan { \n");
+        stringify_nodes(&mut output, &[&self], "");
+        output.push_str("\n}\n");
+        output
     }
 }
 
@@ -65,8 +137,8 @@ impl<'a> Display for ResponsePath<'a> {
 
 impl<'a> Serialize for ResponsePath<'a> {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
+        where
+            S: Serializer,
     {
         serializer.serialize_str(&self.to_string())
     }

@@ -110,7 +110,7 @@ impl SharedRouteTable {
                 Ok::<_, Error>((service.to_string(), document))
             }
         }))
-        .await?;
+            .await?;
 
         let schema = ComposedSchema::combine(resp)?;
         self.inner.write().await.schema = Some(Arc::new(schema));
@@ -153,7 +153,7 @@ impl SharedRouteTable {
                             errors: vec![ServerError::new("Not ready.")],
                             extensions: Default::default(),
                         })
-                        .unwrap(),
+                            .unwrap(),
                     )
                     .unwrap();
             }
@@ -166,7 +166,10 @@ impl SharedRouteTable {
         }
 
         let plan = match tracer.in_span("plan", |_| plan_builder.plan()) {
-            Ok(plan) => plan,
+            Ok(plan) => {
+                // println!(format!("{}", plan));
+                plan
+            }
             Err(response) => {
                 return HttpResponse::builder()
                     .status(StatusCode::OK)
@@ -176,11 +179,15 @@ impl SharedRouteTable {
         };
 
         let executor = Executor::new(&composed_schema);
-        let resp = opentelemetry::trace::FutureExt::with_context(
+        let mut resp = opentelemetry::trace::FutureExt::with_context(
             executor.execute_query(&HttpFetcher::new(&*route_table, &header_map), &plan),
             OpenTelemetryContext::current_with_span(tracer.span_builder("execute").start(&tracer)),
         )
-        .await;
+            .await;
+
+        resp.extensions.insert("__queryPlanExperimental".to_string(), ConstValue::String(plan.to_string()));
+
+        // resp.extensions.insert("AA".to_string(), ConstValue::String("Foooobar".to_string()));
         HttpResponse::builder()
             .status(StatusCode::OK)
             .body(serde_json::to_string(&resp).unwrap())

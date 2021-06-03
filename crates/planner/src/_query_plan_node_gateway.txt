@@ -1,0 +1,32 @@
+QueryPlan {
+  Sequence {
+    Fetch(service: "products") {
+      {
+        topProducts(first: 1) {
+          upc
+          __typename
+          price
+          weight
+        }
+      }
+    },
+    Flatten(path: "topProducts.@") {
+      Fetch(service: "inventory") {
+        {
+          ... on Product {
+            __typename
+            upc
+            price
+            weight
+          }
+        } =>
+        {
+          ... on Product {
+            inStock
+            shippingEstimate
+          }
+        }
+      },
+    },
+  },
+}
